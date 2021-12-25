@@ -1,0 +1,28 @@
+{
+  "name": "skriptnijeziciprojekatvezbe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js",
+    "start": "app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lbrcic4219rn/SkriptniJeziciProjekatVezbe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lbrcic4219rn/SkriptniJeziciProjekatVezbe/issues"
+  },
+  "homepage": "https://github.com/lbrcic4219rn/SkriptniJeziciProjekatVezbe#readme",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.15",
+    "sequelize": "^6.12.1",
+    "sequelize-cli": "^6.3.0"
+  }
+}
