@@ -54,7 +54,14 @@ route.put('/users/:username', (req, res) => {
                 usr.username = req.body.username
                 usr.bio = req.body.bio
                 usr.profilePicture = req.body.profilePicture
-                res.json(rows)
+                usr.save()
+                    .then( 
+                        rows => res.json(rows)
+                    )
+                    .catch(
+                        err => res.status(500).json(err)
+                    )
+                
             }
         )
         .catch( 
@@ -63,9 +70,21 @@ route.put('/users/:username', (req, res) => {
 })
 
 route.delete('/users/:username', (req, res) => {
-    User.findAll()
+    User.findOne({
+        where: {
+            username: req.params.username
+        }
+    })
         .then( 
-            rows => res.json(rows)
+            usr => {
+                usr.destroy()
+                    .then(
+                        rows => res.json(rows)
+                    )
+                    .catch(
+                        err => res.status(500).json(err)
+                    )
+            }
         )
         .catch( 
             err => res.status(500).json(err)

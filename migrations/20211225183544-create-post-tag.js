@@ -15,7 +15,7 @@ module.exports = {
         // }
       },
       tagName: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false,
         primaryKey: true,
         // references: {

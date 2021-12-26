@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Post_Tag.init({
+    postID: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+    }, 
+    tagName: {
+      type: DataTypes.STRING,
+      primaryKey: true
+    }
   }, {
     sequelize,
     modelName: 'Post_Tag',

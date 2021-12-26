@@ -12,9 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate({Post_Tag}) {
       // define association here
       this.hasMany(Post_Tag, {
-        foreignKey: 'tagID',
-        onDelete: 'cascade',
-        hooks: true,
+        foreignKey: 'tagName',
       })
     }
   };
@@ -23,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      primaryKey: true,
     }
   }, {
     sequelize,
