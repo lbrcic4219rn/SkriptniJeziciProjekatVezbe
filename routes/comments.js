@@ -81,16 +81,18 @@ route.post('/comments', (req, res) => {
 
 route.put('/comments/:id', async (req, res) => {
     try {
-        let user = await User.findOne({wehere: {username: req.usr.username}})
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
         let comment = await Comment.findOne({
             where: {
                 id: req.params.id,
             }
         })
-        console.log("is admin", user.dataValues)
-        console.log("is owner", comment.dataValues.userID === req.usr.username)
-        console.log(comment.dataValues.userID, req.usr.username)
-        if (!(user.dataValues.admin && (comment.dataValues.userID === req.usr.username))) {
+
+        if (!(user.dataValues.admin || (comment.dataValues.userID === req.usr.username))) {
             return res.status(401).json({ msg:"not authorized" })
         }
     } catch (e) {
@@ -119,7 +121,25 @@ route.put('/comments/:id', async (req, res) => {
         ) 
 })
 
-route.delete('/comments/:id', (req, res) => {
+route.delete('/comments/:id', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        let comment = await Comment.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        if (!(user.dataValues.admin || (comment.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
     Comment.findOne({
         where: {
             id: req.params.id

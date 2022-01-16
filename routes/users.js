@@ -1,4 +1,4 @@
-const { sequelize, User } = require('../models');
+const { sequelize, User, Comment} = require('../models');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -55,7 +55,19 @@ route.get('/users/:username', (req, res) => {
         ) 
 })
 
-route.put('/users/:username', (req, res) => {
+route.put('/users/:username', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        if (!(user.dataValues.admin || (req.params.username === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
     User.findOne({
         where: {
             username: req.params.username,
@@ -80,7 +92,19 @@ route.put('/users/:username', (req, res) => {
         ) 
 })
 
-route.delete('/users/:username', (req, res) => {
+route.delete('/users/:username', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        if (!(user.dataValues.admin || (req.params.username === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
     User.findOne({
         where: {
             username: req.params.username

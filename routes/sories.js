@@ -1,4 +1,4 @@
-const { sequelize, Story } = require('../models');
+const { sequelize, Story, User, Post} = require('../models');
 const express = require('express');
 const jwt = require("jsonwebtoken");
 
@@ -75,7 +75,26 @@ route.post('/stories', (req, res) => {
         ) 
 })
 
-route.put('/stories/:id', (req, res) => {
+route.put('/stories/:id', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        let story = await Story.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        if (!(user.dataValues.admin || (story.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
+
     Story.findOne({
         where: {
             id: req.params.id,
@@ -99,7 +118,25 @@ route.put('/stories/:id', (req, res) => {
         ) 
 })
 
-route.delete('/stories/:id', (req, res) => {
+route.delete('/stories/:id', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        let story = await Story.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        if (!(user.dataValues.admin || (story.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
     Story.findOne({
         where: {
             id: req.params.id

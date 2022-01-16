@@ -21,6 +21,7 @@ app.post('/register', (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10),
         admin: req.body.admin
     }
+    console.log("tmp", tmp)
     User.create(tmp)
         .then( 
             rows => {
@@ -28,6 +29,7 @@ app.post('/register', (req, res) => {
                     username: rows.username,
                     admin: rows.admin
                 }
+                console.log("rows", rows)
                 const token = jwt.sign(usr, process.env.ACCESS_TOKEN_SECRET)
                 res.json({ token: token })
             }
@@ -46,6 +48,7 @@ app.post('/login', (req, res) => {
     })
         .then( 
             usr => {
+                console.log(usr)
                 if(bcrypt.compareSync(req.body.password, usr.password)){
 
                     const tmp = {

@@ -1,4 +1,4 @@
-const { sequelize, Post, Tag, Post_Tag } = require('../models');
+const { sequelize, Post, Tag, Post_Tag, User, Comment} = require('../models');
 const express = require('express');
 const post_tag = require('../models/post_tag');
 const jwt = require("jsonwebtoken");
@@ -108,12 +108,24 @@ route.post('/posts', async (req, res) => {
 
 route.put('/posts/:id', async (req, res) => {
     try{
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+
         //getujemo post
         const oldPost = await Post.findOne({
             where: {
                 id: req.params.id,
             }
         })
+
+        if (!(user.dataValues.admin || (oldPost.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+
+
 
         //getujemo sve tagove koje imamo sacuvane u tablei sa postovima i tagovima  
         let oldTags = await Post_Tag.findAll({
@@ -170,7 +182,26 @@ route.put('/posts/:id', async (req, res) => {
         
 })
 
-route.delete('/posts/:id', (req, res) => {
+route.delete('/posts/:id', async (req, res) => {
+    try {
+        let user = await User.findOne({
+            where: {
+                username: req.usr.username,
+            }
+        })
+        let post = await Post.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        if (!(user.dataValues.admin || (post.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
+
     Post.findOne({
         where: {
             id: req.params.id
