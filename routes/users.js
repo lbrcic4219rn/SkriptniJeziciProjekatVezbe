@@ -2,31 +2,39 @@ const { sequelize, User } = require('../models');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
 const route = express.Router();
 route.use(express.json());
 route.use(express.urlencoded({ extended: true }))
 
-const authToken = (req, res, next) => {
-    authHeader = req.headers['authorization']
-    const token = authToken && authHeader.spit(' ')[1]
+function authToken(req, res, next){
 
-    if(token === null) return res.status(401).json({ msg: 'not authorized'})
-    
+    const authHeader = req.headers['authorization']
+    if(authHeader == undefined) return res.status(401).json({ msg:"not authorized" })
+    const token = authHeader && authHeader.split(' ')[1]
+
+
+    if(token === null) return res.status(401).json({ msg:"not authorized" })
+
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, usr) => {
-        if (err) return res.status(403).json({ msg: 'bad token'})
-
+        if (err) return res.status(403).json({ msg: err })
         req.usr = usr;
-
-        next()
-    }) 
+    })
+    next()
 }
 
 route.use(authToken)
 
 route.get('/users', (req, res) => {
     User.findAll()
-        .then( 
-            rows => res.json(rows)
+        .then(
+            rows => {
+                rows = rows.map(el => {
+                    const {password, ...newObj} = el.dataValues
+                    return newObj;
+                })
+                res.json(rows)
+            }
         )
         .catch( 
             err => res.status(500).json(err)
@@ -55,7 +63,6 @@ route.put('/users/:username', (req, res) => {
     })
         .then( 
             usr => {
-                usr.username = req.body.username
                 usr.bio = req.body.bio
                 usr.profilePicture = req.body.profilePicture
                 usr.save()

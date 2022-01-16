@@ -26,6 +26,7 @@ app.post('/register', (req, res) => {
             rows => {
                 const usr = {
                     username: rows.username,
+                    admin: rows.admin
                 }
                 const token = jwt.sign(usr, process.env.ACCESS_TOKEN_SECRET)
                 res.json({ token: token })
@@ -49,6 +50,7 @@ app.post('/login', (req, res) => {
 
                     const tmp = {
                         username: usr.username,
+                        admin: usr.admin
                     }
                     const token = jwt.sign(tmp, process.env.ACCESS_TOKEN_SECRET)
 

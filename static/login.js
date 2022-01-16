@@ -18,9 +18,10 @@ const handleLogin = (e) => {
         .then( res => res.json())
         .then( data => {
             if(!data.msg) {
+                localStorage.setItem("user", username)
                 document.cookie = `token=${data.token};SameSiite=Lax`
-                window.location.href = '/'
-            } else { 
+                window.location.href = '/index.html'
+            } else {
                 const p = document.createElement('p')
                 const statusContainer = document.querySelector("#status")
                 console.log(data);

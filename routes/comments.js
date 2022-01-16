@@ -1,9 +1,28 @@
-const { sequelize, Comment } = require('../models');
+const { sequelize, Comment, User } = require('../models');
 const express = require('express');
+const jwt = require("jsonwebtoken");
 
 const route = express.Router();
 route.use(express.json());
 route.use(express.urlencoded({ extended: true }))
+
+function authToken(req, res, next){
+
+    const authHeader = req.headers['authorization']
+    if(authHeader == undefined) return res.status(401).json({ msg:"not authorized" })
+    const token = authHeader && authHeader.split(' ')[1]
+
+
+    if(token === null) return res.status(401).json({ msg:"not authorized" })
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,  (err, usr)  => {
+        if (err) return res.status(403).json({ msg: err })
+        req.usr = usr;
+    })
+    next()
+}
+
+route.use(authToken)
 
 route.get('/comments', (req, res) => {
     Comment.findAll()
@@ -31,6 +50,8 @@ route.get('/users/:id', (req, res) => {
 
 
 route.get('/comments/posts/:postID', (req, res) => {
+
+
     Comment.findAll({
         where: {
             postID: req.params.postID,
@@ -43,7 +64,6 @@ route.get('/comments/posts/:postID', (req, res) => {
             err => res.status(500).json(err)
         ) 
 })
-
 
 route.post('/comments', (req, res) => {
     Comment.create({
@@ -59,7 +79,23 @@ route.post('/comments', (req, res) => {
         ) 
 })
 
-route.put('/comments/:id', (req, res) => {
+route.put('/comments/:id', async (req, res) => {
+    try {
+        let user = await User.findOne({wehere: {username: req.usr.username}})
+        let comment = await Comment.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+        console.log("is admin", user.dataValues)
+        console.log("is owner", comment.dataValues.userID === req.usr.username)
+        console.log(comment.dataValues.userID, req.usr.username)
+        if (!(user.dataValues.admin && (comment.dataValues.userID === req.usr.username))) {
+            return res.status(401).json({ msg:"not authorized" })
+        }
+    } catch (e) {
+        res.status(500).json(err)
+    }
     Comment.findOne({
         where: {
             id: req.params.id,

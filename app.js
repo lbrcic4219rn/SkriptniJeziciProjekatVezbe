@@ -12,44 +12,40 @@ require('dotenv').config();
 const app = express();
 
 //routes
-// app.use('/api', users);
-// app.use('/api', tags);
-// app.use('/api', posts);
-// app.use('/api', comments);
-// app.use('/api', sotries);
+app.use('/api', users);
+app.use('/api', tags);
+app.use('/api', posts);
+app.use('/api', comments);
+app.use('/api', sotries);
 
 app.use(express.json());
 
-const getCookies = (req) => {
-    console.log("GETTING THEM COOKIES");
-    if(req.headers.cookie == null) return null;
+function getCookies(req){
+    if(req.headers.cookie == null) return {};
 
-    const rawCookies = req.headers.cookie.spit('; ')
+    const rawCookies = req.headers.cookie.split('; ')
     const parsedCookeis  = {}
 
     rawCookies.forEach(element => {
+
         pc = element.split('=')
         parsedCookeis[pc[0]] = pc[1]
     });
 
+    return parsedCookeis
 
 }
 
-const authToken = (req, res, next) => {
-    console.log("attempted MIDLEWARE");
+function authToken(req, res, next){
     const cookies = getCookies(req)
-    //if(cookies === null) return res.redirect(301, '/login')
     const token = cookies['token']
 
-    //if(token === null) return res.redirect(301, '/login')
+    if(token === null) return res.redirect(301, '/login')
     
-    // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, usr) => {
-    //     if (err) return res.redirect(301, '/login')
-
-    //     req.usr = usr;
-
-       
-    // }) 
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, usr) => {
+        if (err) return res.redirect(301, '/login')
+        req.usr = usr;
+    })
     next()
 }
 
@@ -61,8 +57,12 @@ app.get('/login', (req, res) => {
     res.sendFile("login.html", { root: './static' });  
 })
 
-app.get('/', (req, res) => {
-    res.sendFile("index.html", { root: './static' });  
+app.get('/', authToken, (req, res) => {
+    res.sendFile("index.html", { root: './static' });
+})
+
+app.get('/index.html', authToken, (req, res) => {
+    res.sendFile("index.html", { root: './static' });
 })
 
 app.use(express.static(path.join(__dirname, 'static')));
