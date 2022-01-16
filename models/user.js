@@ -41,6 +41,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     profilePicture: {
       type: DataTypes.STRING,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    admin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     }
     // validate: { isEmail: { msg: "nije Email" } } UBACIVANJE VALIDATORA I MSG JE ERROR MSG
   }, {

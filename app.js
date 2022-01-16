@@ -6,39 +6,67 @@ const posts = require('./routes/posts')
 const comments = require('./routes/comments')
 const sotries = require('./routes/sories')
 const path = require('path');
-const bp = require('body-parser');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const app = express();
 
 //routes
-app.use('/api', users);
-app.use('/api', tags);
-app.use('/api', posts);
-app.use('/api', comments);
-app.use('/api', sotries);
+// app.use('/api', users);
+// app.use('/api', tags);
+// app.use('/api', posts);
+// app.use('/api', comments);
+// app.use('/api', sotries);
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'static')));
-app.use(bp.urlencoded({extended: false}));
+
+const getCookies = (req) => {
+    console.log("GETTING THEM COOKIES");
+    if(req.headers.cookie == null) return null;
+
+    const rawCookies = req.headers.cookie.spit('; ')
+    const parsedCookeis  = {}
+
+    rawCookies.forEach(element => {
+        pc = element.split('=')
+        parsedCookeis[pc[0]] = pc[1]
+    });
+
+
+}
+
+const authToken = (req, res, next) => {
+    console.log("attempted MIDLEWARE");
+    const cookies = getCookies(req)
+    //if(cookies === null) return res.redirect(301, '/login')
+    const token = cookies['token']
+
+    //if(token === null) return res.redirect(301, '/login')
+    
+    // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, usr) => {
+    //     if (err) return res.redirect(301, '/login')
+
+    //     req.usr = usr;
+
+       
+    // }) 
+    next()
+}
+
+app.get('/register', (req, res) => {
+    res.sendFile("register.html", { root: './static' });  
+})
+
+app.get('/login', (req, res) => {
+    res.sendFile("login.html", { root: './static' });  
+})
 
 app.get('/', (req, res) => {
-    res.sendFile("index.html");  
+    res.sendFile("index.html", { root: './static' });  
 })
 
-//GETOVANJE PARAMETARA IZ RUTE KOJI MOGU BITI POMENLJIVI
-app.get('/testRuta/:kategorija/:ime', (req, res) => {
-    res.send(`TestRuta ${req.params.kategorija} ${req.params.ime}`);  
-})
+app.use(express.static(path.join(__dirname, 'static')));
 
-//QUEY PARAMS
-app.get('/testRuta', (req, res) => {
-    res.send(`TestRuta ${req.query.kategorija} ${req.query.ime}`);  
-})
-
-app.post('/post', (req, res) => {
-    console.log(req.body);
-    res.send(`TestRuta ${req.body}`);  
-})
 app.listen({ port: 8000 }, async () => {
     await sequelize.authenticate();
 });

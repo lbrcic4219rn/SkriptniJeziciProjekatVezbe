@@ -6,6 +6,15 @@ module.exports = {
         type: Sequelize.STRING,
         primaryKey: true,
       },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      admin: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       bio: {
         type: Sequelize.STRING
       },
