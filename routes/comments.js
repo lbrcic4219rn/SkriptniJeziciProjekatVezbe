@@ -1,6 +1,8 @@
 const { sequelize, Comment, User } = require('../models');
+
 const express = require('express');
 const jwt = require("jsonwebtoken");
+const joi = require("joi");
 
 const route = express.Router();
 route.use(express.json());
@@ -34,7 +36,13 @@ route.get('/comments', (req, res) => {
         ) 
 })
 
-route.get('/users/:id', (req, res) => {
+route.get('/comments/:id', (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required()
+    })
+    const {error, value} = schema.validate({id: req.params.id})
+    if(error)
+        res.status(400).json(error)
     Comment.findOne({
         where: {
             id: req.params.id,
@@ -48,9 +56,14 @@ route.get('/users/:id', (req, res) => {
         ) 
 })
 
-
 route.get('/comments/posts/:postID', (req, res) => {
-
+    //Input validation
+    const schema = joi.object({
+        id: joi.number().min(1).required()
+    })
+    const {error, value} = schema.validate({id: req.params.postID})
+    if(error)
+        res.status(400).json(error)
 
     Comment.findAll({
         where: {
@@ -65,9 +78,23 @@ route.get('/comments/posts/:postID', (req, res) => {
         ) 
 })
 
-route.post('/comments', (req, res) => {
+route.post('/comments', async (req, res) => {
+    //Input validation
+    const schema = joi.object({
+        userID: joi.string().required(),
+        postID: joi.number().min(1).required(),
+        data: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        userID: req.usr.username,
+        postID: req.body.postID,
+        data: req.body.data
+    })
+    if(error)
+        res.status(400).json(error)
+
     Comment.create({
-        userID: req.body.userID,
+        userID: req.usr.username,
         postID: req.body.postID,
         data: req.body.data,
     })
@@ -80,6 +107,18 @@ route.post('/comments', (req, res) => {
 })
 
 route.put('/comments/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+        userID: joi.string().required(),
+        data: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+        userID: req.usr.username,
+        data: req.body.data
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {
@@ -122,6 +161,14 @@ route.put('/comments/:id', async (req, res) => {
 })
 
 route.delete('/comments/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {

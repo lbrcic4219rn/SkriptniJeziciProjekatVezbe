@@ -2,6 +2,7 @@ const { sequelize, Post, Tag, Post_Tag, User, Comment} = require('../models');
 const express = require('express');
 const post_tag = require('../models/post_tag');
 const jwt = require("jsonwebtoken");
+const joi = require("joi");
 
 const route = express.Router();
 route.use(express.json());
@@ -36,6 +37,14 @@ route.get('/posts', (req, res) => {
 })
 
 route.get('/posts/:id', (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
     Post.findOne({
         where: {
             id: req.params.id,
@@ -50,6 +59,14 @@ route.get('/posts/:id', (req, res) => {
 })
 
 route.get('/posts/users/:username', (req, res) => {
+    const schema = joi.object({
+        id: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.username,
+    })
+    if(error)
+        res.status(400).json(error)
     Post.findAll({
         where: {
             userID: req.params.username,
@@ -64,6 +81,18 @@ route.get('/posts/users/:username', (req, res) => {
 })
 
 route.post('/posts', async (req, res) => {
+    const schema = joi.object({
+        data: joi.string().required(),
+        image: joi.string().required(),
+        tags: joi.required()
+    })
+    const {error, value} = schema.validate({
+        data: req.body.data,
+        image: req.body.image,
+        tags: req.body.tags,
+    })
+    if(error)
+        res.status(400).json(error)
     try{
         //Pravljenje tagova u koliko ne postoje
         const tags = req.body.tags;
@@ -84,7 +113,7 @@ route.post('/posts', async (req, res) => {
 
         //kreiranje novog Posta
         newPost = await Post.create({
-            userID: req.body.userID,
+            userID: req.usr.username,
             data: req.body.data,
             likeCount: 0,
             image: req.body.image
@@ -107,6 +136,20 @@ route.post('/posts', async (req, res) => {
 })
 
 route.put('/posts/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+        data: joi.string().required(),
+        image: joi.string().required(),
+        tags: joi.required()
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+        data: req.body.data,
+        image: req.body.image,
+        tags: req.body.tags,
+    })
+    if(error)
+        res.status(400).json(error)
     try{
         let user = await User.findOne({
             where: {
@@ -183,6 +226,14 @@ route.put('/posts/:id', async (req, res) => {
 })
 
 route.delete('/posts/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {

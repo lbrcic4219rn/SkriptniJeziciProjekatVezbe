@@ -1,6 +1,7 @@
 const { sequelize, User, Comment} = require('../models');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const joi = require("joi");
 require('dotenv').config();
 
 const route = express.Router();
@@ -42,6 +43,14 @@ route.get('/users', (req, res) => {
 })
 
 route.get('/users/:username', (req, res) => {
+    const schema = joi.object({
+        username: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        username: req.params.username,
+    })
+    if(error)
+        res.status(400).json(error)
     User.findOne({
         where: {
             username: req.params.username,
@@ -56,6 +65,19 @@ route.get('/users/:username', (req, res) => {
 })
 
 route.put('/users/:username', async (req, res) => {
+    const schema = joi.object({
+        username: joi.string().required(),
+        bio: joi.string().required(),
+        profilePicture: joi.string().required()
+    })
+    const {error, value} = schema.validate({
+        username: req.usr.username,
+        bio: req.body.bio,
+        profilePicture: req.body.profilePicture,
+
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {
@@ -93,6 +115,12 @@ route.put('/users/:username', async (req, res) => {
 })
 
 route.delete('/users/:username', async (req, res) => {
+    const schema = joi.object({
+        username: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        username: req.params.username,
+    })
     try {
         let user = await User.findOne({
             where: {

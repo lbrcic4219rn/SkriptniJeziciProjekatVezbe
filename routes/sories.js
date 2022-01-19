@@ -1,6 +1,7 @@
 const { sequelize, Story, User, Post} = require('../models');
 const express = require('express');
 const jwt = require("jsonwebtoken");
+const joi = require("joi");
 
 const route = express.Router();
 route.use(express.json());
@@ -35,6 +36,15 @@ route.get('/stories', (req, res) => {
 })
 
 route.get('/stories/:id', (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
+
     Story.findOne({
         where: {
             id: req.params.id,
@@ -49,6 +59,14 @@ route.get('/stories/:id', (req, res) => {
 })
 
 route.get('/stories/users/:userID', (req, res) => {
+    const schema = joi.object({
+        id: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.userID,
+    })
+    if(error)
+        res.status(400).json(error)
     Story.findAll({
         where: {
             userID: req.params.userID,
@@ -63,8 +81,16 @@ route.get('/stories/users/:userID', (req, res) => {
 })
 
 route.post('/stories', (req, res) => {
+    const schema = joi.object({
+        data: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        data: req.body.data,
+    })
+    if(error)
+        res.status(400).json(error)
     Story.create({
-        userID: req.body.username,
+        userID: req.usr.username,
         data: req.body.data,
     })
         .then( 
@@ -76,6 +102,16 @@ route.post('/stories', (req, res) => {
 })
 
 route.put('/stories/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+        data: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+        data: req.body.data,
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {
@@ -119,6 +155,14 @@ route.put('/stories/:id', async (req, res) => {
 })
 
 route.delete('/stories/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let user = await User.findOne({
             where: {

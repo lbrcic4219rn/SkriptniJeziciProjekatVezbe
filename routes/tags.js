@@ -2,6 +2,7 @@ const { sequelize, Post,  Post_Tag} = require('../models');
 
 const express = require('express');
 const jwt = require("jsonwebtoken");
+const joi = require("joi");
 
 const route = express.Router();
 route.use(express.json());
@@ -26,6 +27,14 @@ function authToken(req, res, next){
 route.use(authToken)
 
 route.get('/tags/posts/:tagName', async (req, res) => {
+    const schema = joi.object({
+        tagName: joi.string().required(),
+    })
+    const {error, value} = schema.validate({
+        tagName: req.params.tagName
+    })
+    if(error)
+        res.status(400).json(error)
     try {
         let posts = await Post_Tag.findAll({
             where: {
