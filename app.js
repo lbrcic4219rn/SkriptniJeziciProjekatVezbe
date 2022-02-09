@@ -7,10 +7,17 @@ const comments = require('./routes/comments')
 const sotries = require('./routes/sories')
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
+
 require('dotenv').config();
 
 const app = express();
 
+const corsOptions = {
+    origin: 'http://localhost:8080',
+    optionSuccessStatus: 200,
+}
+app.use(cors(corsOptions));
 //routes
 app.use('/api', users);
 app.use('/api', tags);
@@ -19,6 +26,7 @@ app.use('/api', comments);
 app.use('/api', sotries);
 
 app.use(express.json());
+
 
 function getCookies(req){
     if(req.headers.cookie == null) return {};

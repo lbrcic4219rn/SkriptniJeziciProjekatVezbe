@@ -8,7 +8,10 @@ route.use(express.json());
 route.use(express.urlencoded({ extended: true }))
 
 function authToken(req, res, next){
-
+    if(req.method == "GET"){
+        next()
+        return
+    }
     const authHeader = req.headers['authorization']
     if(authHeader == undefined) return res.status(401).json({ msg:"not authorized" })
     const token = authHeader && authHeader.split(' ')[1]

@@ -9,7 +9,10 @@ route.use(express.json());
 route.use(express.urlencoded({ extended: true }))
 
 function authToken(req, res, next){
-
+    if(req.method == "GET"){
+        next()
+        return
+    }
     const authHeader = req.headers['authorization']
     if(authHeader == undefined) return res.status(401).json({ msg:"not authorized" })
     const token = authHeader && authHeader.split(' ')[1]
@@ -156,7 +159,6 @@ route.put('/posts/:id', async (req, res) => {
                 username: req.usr.username,
             }
         })
-
         //getujemo post
         const oldPost = await Post.findOne({
             where: {
@@ -167,7 +169,6 @@ route.put('/posts/:id', async (req, res) => {
         if (!(user.dataValues.admin || (oldPost.dataValues.userID === req.usr.username))) {
             return res.status(401).json({ msg:"not authorized" })
         }
-
 
 
         //getujemo sve tagove koje imamo sacuvane u tablei sa postovima i tagovima  
@@ -219,11 +220,62 @@ route.put('/posts/:id', async (req, res) => {
     catch (err) { 
         console.log("error", err)
         res.status(500).json(err)
-    }
-
-    
-        
+    }   
 })
+
+route.post('/posts/like/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
+    try{
+        const oldPost = await Post.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        oldPost.likeCount += 1         
+        savedPost = await oldPost.save()
+        res.json(savedPost)
+    }
+    catch (err) { 
+        console.log("error", err)
+        res.status(500).json(err)
+    }   
+})
+
+
+route.post('/posts/unlike/:id', async (req, res) => {
+    const schema = joi.object({
+        id: joi.number().min(1).required(),
+    })
+    const {error, value} = schema.validate({
+        id: req.params.id,
+    })
+    if(error)
+        res.status(400).json(error)
+    try{
+        const oldPost = await Post.findOne({
+            where: {
+                id: req.params.id,
+            }
+        })
+
+        oldPost.likeCount -= 1         
+        savedPost = await oldPost.save()
+        res.json(savedPost)
+    }
+    catch (err) { 
+        console.log("error", err)
+        res.status(500).json(err)
+    }   
+})
+
 
 route.delete('/posts/:id', async (req, res) => {
     const schema = joi.object({

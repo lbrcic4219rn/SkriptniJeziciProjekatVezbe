@@ -9,13 +9,17 @@ route.use(express.json());
 route.use(express.urlencoded({ extended: true }))
 
 function authToken(req, res, next){
-
+    
+    if(req.method == "GET"){
+        next()
+        return
+    }
     const authHeader = req.headers['authorization']
     if(authHeader == undefined) return res.status(401).json({ msg:"not authorized" })
     const token = authHeader && authHeader.split(' ')[1]
 
 
-    if(token === null) return res.status(401).json({ msg:"not authorized" })
+    if(token === null) return res.status(401).json({ msg:"not authorized1" })
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, usr) => {
         if (err) return res.status(403).json({ msg: err })
@@ -57,7 +61,10 @@ route.get('/users/:username', (req, res) => {
         }
     })
         .then( 
-            rows => res.json(rows)
+            rows => {
+                const {password, ...newObj} = rows.dataValues
+                res.json(newObj)
+            }
         )
         .catch( 
             err => res.status(500).json(err)
